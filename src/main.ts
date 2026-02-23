@@ -3,6 +3,277 @@ import normalizeMimeType from "./normalizeMimeType.js";
 import handlers from "./handlers";
 import { TraversionGraph } from "./TraversionGraph.js";
 
+/**
+ * Japanese translations with English meanings for UI elements
+ */
+const JapaneseUI = {
+  advancedMode: "アドバンスドモード (Advanced mode)",
+  simpleMode: "シンプルモード (Simple mode)",
+  convertFrom: "変換元: (Convert from)",
+  convertTo: "変換先: (Convert to)",
+  search: "検索 (Search)",
+  convert: "変換 (Convert)",
+  loadingTools: "ツールを読み込み中... (Loading tools...)",
+  allInputFilesMustBeSameType: "すべての入力ファイルは同じタイプである必要があります (All input files must be of the same type).",
+  clickToAddFile: "ファイルを追加するにはクリックしてください (Click to add file)",
+  orDragAndDrop: "またはここにドラッグ＆ドロップ (or drag & drop here)",
+  and: "および (and)",
+  more: "さらに (more)",
+  unknownFormat: "不明なフォーマット (Unknown format)"
+};
+
+/**
+ * Format name translations with English meanings
+ */
+const FormatTranslations: Record<string, string> = {
+  // Images
+  "Portable Network Graphics": "ポータブルネットワークグラフィックス (Portable Network Graphics)",
+  "Joint Photographic Experts Group": "Joint Photographic Experts Group (JPEG)",
+  "WebP": "WebP",
+  "CompuServe Graphics Interchange Format": "CompuServe Graphics Interchange Format (GIF)",
+  "Scalable Vector Graphics": "スケーラブルベクターグラフィックス (Scalable Vector Graphics)",
+  "Bitmap Image File": "ビットマップイメージファイル (BMP)",
+  "Graphics Interchange Format": "Graphics Interchange Format (GIF)",
+  "JPEG 2000": "JPEG 2000",
+  "Portable Image Format": "Portable Image Format (PICT)",
+  "Tagged Image File Format": "タグ付き画像ファイル形式 (TIFF)",
+  "Portable Pixmap": "Portable Pixmap (PPM)",
+  "Portable Graymap": "Portable Graymap (PGM)",
+  "Portable BitMap": "Portable BitMap (PBM)",
+  "Truevision Graphics Adapter": "Truevision Graphics Adapter (TGA)",
+  "JPEG": "JPEG (Joint Photographic Experts Group)",
+  "GIF": "GIF (Graphics Interchange Format)",
+  "SVG": "SVG (Scalable Vector Graphics)",
+  "BMP": "BMP (Bitmap Image File)",
+  "TIFF": "TIFF (Tagged Image File Format)",
+  "PPM": "PPM (Portable Pixmap)",
+  "PGM": "PGM (Portable Graymap)",
+  "PBM": "PBM (Portable BitMap)",
+  "TGA": "TGA (Truevision Graphics Adapter)",
+  "JPG": "JPG (JPEG)",
+  "PNG": "PNG (Portable Network Graphics)",
+  
+  // Text
+  "JavaScript Object Notation": "JavaScriptオブジェクト表記 (JavaScript Object Notation)",
+  "Extensible Markup Language": "拡張可能なマークアップ言語 (Extensible Markup Language)",
+  "YAML Ain't Markup Language": "YAML Ain't Markup Language",
+  "Comma Seperated Values": "カンマ区切り値 (Comma Separated Values)",
+  "Plain Text": "プレーンテキスト (Plain Text)",
+  "Hypertext Markup Language": "ハイパーテキストマークアップ言語 (Hypertext Markup Language)",
+  "Markdown": "Markdown",
+  "Text": "テキスト (Text)",
+  "JSON": "JSON (JavaScript Object Notation)",
+  "XML": "XML (Extensible Markup Language)",
+  "YAML": "YAML (YAML Ain't Markup Language)",
+  "CSV": "CSV (Comma Separated Values)",
+  "TXT": "TXT (Plain Text)",
+  "HTML": "HTML (Hypertext Markup Language)",
+  "MD": "MD (Markdown)",
+  
+  // Audio
+  "Waveform Audio File Format": "波形オーディオファイル形式 (Waveform Audio File Format)",
+  "MPEG-1 Audio Layer 3": "MPEG-1 Audio Layer 3 (MP3)",
+  "MIDI Musical Instrument Digital Interface": "MIDI音楽機器デジタルインターフェース (MIDI Musical Instrument Digital Interface)",
+  "FLAC": "FLAC (Free Lossless Audio Codec)",
+  "Ogg Vorbis": "Ogg Vorbis",
+  "Opus": "Opus",
+  "WAV": "WAV (Waveform Audio File Format)",
+  "MP3": "MP3 (MPEG-1 Audio Layer 3)",
+  "MIDI": "MIDI (Musical Instrument Digital Interface)",
+  "OGG": "OGG (Ogg Vorbis)",
+  "OPUS": "OPUS (Opus)",
+  
+  // Video
+  "Moving Picture Experts Group": "Moving Picture Experts Group (MPEG)",
+  "Audio Video Interleaved": "オーディオビデオインターリーブ (Audio Video Interleaved)",
+  "QuickTime File Format": "QuickTimeファイル形式 (QuickTime File Format)",
+  "MPEG": "MPEG (Moving Picture Experts Group)",
+  "AVI": "AVI (Audio Video Interleaved)",
+  "MOV": "MOV (QuickTime File Format)",
+  "MKV": "MKV (Matroska Video)",
+  "WEBM": "WEBM (WebM Video)",
+  "MP4": "MP4 (MPEG-4)",
+  
+  // Archives
+  "ZIP": "ZIP",
+  "RAR": "RAR",
+  "7-Zip": "7-Zip",
+  "GZIP": "GZIP",
+  "TAR": "TAR",
+  "TAR.GZ": "TAR.GZ",
+  "TAR.BZ2": "TAR.BZ2",
+  "TAR.XZ": "TAR.XZ",
+  "7Z": "7Z (7-Zip)",
+  
+  // Documents
+  "Portable Document Format": "ポータブルドキュメントフォーマット (Portable Document Format)",
+  "OpenDocument Text": "OpenDocumentテキスト (OpenDocument Text)",
+  "OpenDocument Presentation": "OpenDocumentプレゼンテーション (OpenDocument Presentation)",
+  "OpenDocument Spreadsheet": "OpenDocumentスプレッドシート (OpenDocument Spreadsheet)",
+  "OpenDocument Drawing": "OpenDocument描画 (OpenDocument Drawing)",
+  "PDF": "PDF (Portable Document Format)",
+  "ODT": "ODT (OpenDocument Text)",
+  "ODP": "ODP (OpenDocument Presentation)",
+  "ODS": "ODS (OpenDocument Spreadsheet)",
+  "ODG": "ODG (OpenDocument Drawing)",
+  "DOCX": "DOCX (Microsoft Word)",
+  "XLSX": "XLSX (Microsoft Excel)",
+  "PPTX": "PPTX (Microsoft PowerPoint)",
+  
+  // Fonts
+  "TrueType Font": "TrueTypeフォント (TrueType Font)",
+  "OpenType Font": "OpenTypeフォント (OpenType Font)",
+  "WOFF": "WOFF (Web Open Font Format)",
+  "WOFF2": "WOFF2 (Web Open Font Format 2)",
+  "TTF": "TTF (TrueType Font)",
+  "OTF": "OTF (OpenType Font)",
+  
+  // 3D
+  "Three.js": "Three.js",
+  
+  // Game formats
+  "Minecraft Level Format": "Minecraftレベルフォーマット (Minecraft Level Format)",
+  "Binary Scene Object": "バイナリシーンオブジェクト (Binary Scene Object)",
+  "BSON": "BSON (Binary JSON)",
+  "BSOR": "BSOR (Binary Song Object Resource)",
+  "SB3": "SB3 (Scratch 3.0)",
+  "PND": "PND (Pandora)",
+  "VTF": "VTF (Valve Texture Format)",
+  "WAD": "WAD (Wolfenstein 3D Archive)",
+  "LZMA": "LZMA (Lempel-Ziv-Markov chain)",
+  "LZH": "LZH",
+  "QOI": "QOI (Quite OK Image)",
+  "QOA": "QOA (Quite OK Audio)",
+  "CUR": "CUR (Cursor)",
+  "ANI": "ANI (Animated Cursor)",
+  "ICO": "ICO (Icon)",
+  
+  // Others
+  "HTML Embed": "HTML埋め込み (HTML Embed)",
+  "Canvas to Blob": "キャンバスをBlobに変換 (Canvas to Blob)",
+  "Text to Shell": "テキストをシェルに変換 (Text to Shell)",
+  "Text to Go": "テキストをGoに変換 (Text to Go)",
+  "PNG to QOI": "PNG to QOI",
+  "QOI to PNG": "QOI to PNG",
+  "WAV to QOA": "WAV to QOA",
+  "QOA to WAV": "QOA to WAV",
+  "Image to Text": "画像をテキストに変換 (Image to Text)",
+  "Envelope": "Envelope",
+  "Espeakng": "Espeakng",
+  "FFmpeg": "FFmpeg",
+  "Flo": "Flo",
+  "Font": "Font"
+};
+
+/**
+ * Get Japanese translation for a format name
+ */
+function getJapaneseFormatName(formatName: string, englishName: string): string {
+  // Try to find exact match
+  if (FormatTranslations[formatName]) {
+    return FormatTranslations[formatName];
+  }
+  
+  // Try to find partial match (for handlers)
+  for (const [key, value] of Object.entries(FormatTranslations)) {
+    if (key.includes(formatName) || formatName.includes(key)) {
+      return value;
+    }
+  }
+  
+  // Return original with Japanese katakana conversion for common extensions
+  const katakanaMap: Record<string, string> = {
+    'png': 'PNG (Portable Network Graphics)',
+    'jpeg': 'JPEG (Joint Photographic Experts Group)',
+    'jpg': 'JPEG (Joint Photographic Experts Group)',
+    'webp': 'WebP',
+    'gif': 'GIF (Graphics Interchange Format)',
+    'svg': 'SVG (Scalable Vector Graphics)',
+    'bmp': 'BMP (Bitmap Image File)',
+    'tiff': 'TIFF (Tagged Image File Format)',
+    'tif': 'TIFF (Tagged Image File Format)',
+    'ppm': 'PPM (Portable Pixmap)',
+    'pgm': 'PGM (Portable Graymap)',
+    'pbm': 'PBM (Portable BitMap)',
+    'tga': 'TGA (Truevision Graphics Adapter)',
+    'json': 'JSON (JavaScript Object Notation)',
+    'xml': 'XML (Extensible Markup Language)',
+    'yaml': 'YAML (YAML Ain\'t Markup Language)',
+    'yml': 'YAML (YAML Ain\'t Markup Language)',
+    'csv': 'CSV (Comma Separated Values)',
+    'txt': 'TXT (Plain Text)',
+    'html': 'HTML (Hypertext Markup Language)',
+    'htm': 'HTML (Hypertext Markup Language)',
+    'md': 'MD (Markdown)',
+    'wav': 'WAV (Waveform Audio File Format)',
+    'mp3': 'MP3 (MPEG-1 Audio Layer 3)',
+    'midi': 'MIDI (Musical Instrument Digital Interface)',
+    'flac': 'FLAC (Free Lossless Audio Codec)',
+    'ogg': 'OGG (Ogg Vorbis)',
+    'opus': 'OPUS (Opus)',
+    'mp4': 'MP4 (MPEG-4)',
+    'avi': 'AVI (Audio Video Interleaved)',
+    'mov': 'MOV (QuickTime File Format)',
+    'mkv': 'MKV (Matroska Video)',
+    'webm': 'WEBM (WebM Video)',
+    'zip': 'ZIP',
+    'rar': 'RAR',
+    '7z': '7Z (7-Zip)',
+    'gz': 'GZ (GZIP)',
+    'tar': 'TAR',
+    'tar.gz': 'TAR.GZ',
+    'tar.bz2': 'TAR.BZ2',
+    'tar.xz': 'TAR.XZ',
+    'pdf': 'PDF (Portable Document Format)',
+    'odt': 'ODT (OpenDocument Text)',
+    'odp': 'ODP (OpenDocument Presentation)',
+    'ods': 'ODS (OpenDocument Spreadsheet)',
+    'odg': 'ODG (OpenDocument Drawing)',
+    'docx': 'DOCX (Microsoft Word)',
+    'xlsx': 'XLSX (Microsoft Excel)',
+    'pptx': 'PPTX (Microsoft PowerPoint)',
+    'ttf': 'TTF (TrueType Font)',
+    'otf': 'OTF (OpenType Font)',
+    'woff': 'WOFF (Web Open Font Format)',
+    'woff2': 'WOFF2 (Web Open Font Format 2)',
+    'bson': 'BSON (Binary JSON)',
+    'bsor': 'BSOR (Binary Song Object Resource)',
+    'sb3': 'SB3 (Scratch 3.0)',
+    'pnd': 'PND (Pandora)',
+    'vtf': 'VTF (Valve Texture Format)',
+    'wad': 'WAD (Wolfenstein 3D Archive)',
+    'lzh': 'LZH',
+    'qoi': 'QOI (Quite OK Image)',
+    'qoa': 'QOA (Quite OK Audio)',
+    'cur': 'CUR (Cursor)',
+    'ani': 'ANI (Animated Cursor)',
+    'ico': 'ICO (Icon)',
+    'threejs': 'Three.js',
+    'htmlEmbed': 'HTML埋め込み (HTML Embed)',
+    'canvasToBlob': 'キャンバスをBlobに変換 (Canvas to Blob)',
+    'textToShell': 'テキストをシェルに変換 (Text to Shell)',
+    'textToGo': 'テキストをGoに変換 (Text to Go)',
+    'pngToQoi': 'PNG to QOI',
+    'qoiToPng': 'QOI to PNG',
+    'wavToQoa': 'WAV to QOA',
+    'qoaToWav': 'QOA to WAV',
+    'imageToTxt': '画像をテキストに変換 (Image to Text)',
+    'envelope': 'Envelope',
+    'espeakng': 'Espeakng',
+    'ffmpeg': 'FFmpeg',
+    'flo': 'Flo',
+    'font': 'Font'
+  };
+  
+  const ext = formatName.toLowerCase().split('.').pop();
+  if (ext && katakanaMap[ext]) {
+    return katakanaMap[ext];
+  }
+  
+  return `${formatName} (${englishName})`;
+}
+
+
 /** Files currently selected for conversion */
 let selectedFiles: File[] = [];
 /**
@@ -106,7 +377,7 @@ const fileSelectHandler = (event: Event) => {
   if (files.length === 0) return;
 
   if (files.some(c => c.type !== files[0].type)) {
-    return alert("All input files must be of the same type.");
+    return alert(JapaneseUI.allInputFilesMustBeSameType);
   }
   files.sort((a, b) => a.name === b.name ? 0 : (a.name < b.name ? -1 : 1));
   selectedFiles = files;
@@ -250,6 +521,8 @@ async function buildOptionList () {
       newOption.setAttribute("mime-type", format.mime);
 
       const formatDescriptor = format.format.toUpperCase();
+      const englishName = format.name;
+      
       if (simpleMode) {
         // Hide any handler-specific information in simple mode
         const cleanName = format.name
@@ -257,9 +530,11 @@ async function buildOptionList () {
           .filter((_, i) => i % 2 === 0)
           .filter(c => c != "")
           .join(" ");
-        newOption.appendChild(document.createTextNode(`${formatDescriptor} - ${cleanName} (${format.mime})`));
+        const japaneseName = getJapaneseFormatName(cleanName, englishName);
+        newOption.appendChild(document.createTextNode(`${formatDescriptor} ${japaneseName} (${format.mime})`));
       } else {
-        newOption.appendChild(document.createTextNode(`${formatDescriptor} - ${format.name} (${format.mime}) ${handler.name}`));
+        const japaneseName = getJapaneseFormatName(format.name, englishName);
+        newOption.appendChild(document.createTextNode(`${formatDescriptor} ${japaneseName} (${format.mime}) ${handler.name}`));
       }
 
       const clickHandler = (event: Event) => {
@@ -315,10 +590,10 @@ async function buildOptionList () {
 ui.modeToggleButton.addEventListener("click", () => {
   simpleMode = !simpleMode;
   if (simpleMode) {
-    ui.modeToggleButton.textContent = "Advanced mode";
+    ui.modeToggleButton.textContent = JapaneseUI.advancedMode;
     document.body.style.setProperty("--highlight-color", "#1C77FF");
   } else {
-    ui.modeToggleButton.textContent = "Simple mode";
+    ui.modeToggleButton.textContent = JapaneseUI.simpleMode;
     document.body.style.setProperty("--highlight-color", "#FF6F1C");
   }
   buildOptionList();
@@ -428,14 +703,14 @@ ui.convertButton.onclick = async function () {
   const inputFiles = selectedFiles;
 
   if (inputFiles.length === 0) {
-    return alert("Select an input file.");
+    return alert(JapaneseUI.unknownFormat);
   }
 
   const inputButton = document.querySelector("#from-list .selected");
-  if (!inputButton) return alert("Specify input file format.");
+  if (!inputButton) return alert("入力ファイル形式を指定してください (Specify input file format).");
 
   const outputButton = document.querySelector("#to-list .selected");
-  if (!outputButton) return alert("Specify output file format.");
+  if (!outputButton) return alert("出力ファイル形式を指定してください (Specify output file format).");
 
   const inputOption = allOptions[Number(inputButton.getAttribute("format-index"))];
   const outputOption = allOptions[Number(outputButton.getAttribute("format-index"))];
@@ -466,7 +741,7 @@ ui.convertButton.onclick = async function () {
     const output = await window.tryConvertByTraversing(inputFileData, inputOption, outputOption);
     if (!output) {
       window.hidePopup();
-      alert("Failed to find conversion route.");
+      alert("変換ルートが見つかりませんでした (Failed to find conversion route).");
       return;
     }
 
@@ -474,16 +749,19 @@ ui.convertButton.onclick = async function () {
       downloadFile(file.bytes, file.name);
     }
 
+    const inputFormatName = getJapaneseFormatName(inputOption.format.name, inputOption.format.format);
+    const outputFormatName = getJapaneseFormatName(outputOption.format.name, outputOption.format.format);
+    
     window.showPopup(
-      `<h2>Converted ${inputOption.format.format} to ${outputOption.format.format}!</h2>` +
-      `<p>Path used: <b>${output.path.map(c => c.format.format).join(" → ")}</b>.</p>\n` +
+      `<h2>${inputFormatName} から ${outputFormatName} へ変換しました (Converted)!</h2>` +
+      `<p>使用されたパス: <b>${output.path.map(c => c.format.format).join(" → ")}</b>.</p>\n` +
       `<button onclick="window.hidePopup()">OK</button>`
     );
 
   } catch (e) {
 
     window.hidePopup();
-    alert("Unexpected error while routing:\n" + e);
+    alert("ルーティング中に予期しないエラーが発生しました (Unexpected error while routing):\n" + e);
     console.error(e);
 
   }

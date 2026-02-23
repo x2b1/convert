@@ -1,28 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=VT323&family=Noto+Sans+JP:wght@400;700&display=swap');
+
+:root {
+  --oled-black: #000000;
+  --oled-red: #FF0000;
+  --oled-red-dim: #CC0000;
+  --oled-red-glow: rgba(255, 0, 0, 0.6);
+  --matrix-green: #00FF00;
+  --matrix-green-dim: #008800;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  font-family: sans-serif;
-  --highlight-color: #1C77FF;
+  padding: 0;
+  font-family: 'VT323', 'Noto Sans JP', monospace;
+  background-color: var(--oled-black);
+  color: var(--oled-red);
+  overflow-x: hidden;
+  min-height: 100vh;
 }
 
 #file-input {
   display: none;
 }
 
+/* Matrix rain canvas */
+#matrix-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* Scanlines overlay */
+#scanlines {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15),
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+}
+
 #file-area {
+  position: relative;
+  z-index: 10;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
   width: 100%;
   height: 30vh;
-  background-color: var(--highlight-color);
-  color: white;
+  background: linear-gradient(180deg, 
+    rgba(255, 0, 0, 0.1) 0%,
+    rgba(255, 0, 0, 0.05) 50%,
+    rgba(255, 0, 0, 0.1) 100%);
+  color: var(--oled-red);
   text-align: center;
   cursor: pointer;
+  border-bottom: 3px solid var(--oled-red);
+  box-shadow: 0 0 20px var(--oled-red-glow),
+              inset 0 0 30px rgba(255, 0, 0, 0.1);
+  text-shadow: 0 0 10px var(--oled-red-glow);
+}
+
+#file-area::before {
+  content: '┌────────────────────────────────────┐';
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.2rem;
+  color: var(--oled-red);
+  text-shadow: 0 0 10px var(--oled-red-glow);
+}
+
+#file-area::after {
+  content: '└────────────────────────────────────┘';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.2rem;
+  color: var(--oled-red);
+  text-shadow: 0 0 10px var(--oled-red-glow);
 }
 
 #file-area h2,
 #file-area p {
-  margin: 5px;
+  margin: 10px;
+  font-size: 1.5rem;
+  text-shadow: 0 0 10px var(--oled-red-glow),
+               0 0 20px var(--oled-red-glow);
+}
+
+#file-area:hover {
+  background: linear-gradient(180deg, 
+    rgba(255, 0, 0, 0.2) 0%,
+    rgba(255, 0, 0, 0.1) 50%,
+    rgba(255, 0, 0, 0.2) 100%);
 }
 
 #side-panel {
@@ -34,41 +125,72 @@ body {
   padding: 2em;
   box-sizing: border-box;
   pointer-events: none;
+  z-index: 20;
 }
 
 #side-panel button {
   font-size: 1rem;
   width: 100%;
   padding: 10px 20px;
-  border: 0;
-  border-radius: 10px;
-  background-color: white;
-  color: var(--highlight-color);
+  border: 2px solid var(--oled-red);
+  border-radius: 5px;
+  background-color: transparent;
+  color: var(--oled-red);
+  font-family: 'VT323', monospace;
   font-weight: bold;
   cursor: pointer;
-  box-shadow: 0 5px 0 0 rgba(169, 169, 169, 0.4);
+  box-shadow: 0 0 10px var(--oled-red-glow),
+              inset 0 0 10px rgba(255, 0, 0, 0.1);
+  text-shadow: 0 0 5px var(--oled-red-glow);
   pointer-events: all;
+  transition: all 0.3s ease;
+  position: relative;
 }
+
+#side-panel button::before {
+  content: '【';
+  margin-right: 5px;
+}
+
+#side-panel button::after {
+  content: '】';
+  margin-left: 5px;
+}
+
+#side-panel button:hover {
+  background-color: var(--oled-red);
+  color: var(--oled-black);
+  box-shadow: 0 0 20px var(--oled-red-glow),
+              0 0 40px var(--oled-red-glow);
+}
+
 #side-panel button:active {
-  transform: translateY(5px);
-  box-shadow: 0 0 0 0;
+  transform: translateY(2px);
+  box-shadow: 0 0 10px var(--oled-red-glow);
 }
 
 #commit-id {
-  color: #fff9;
+  color: var(--oled-red);
   text-align: center;
   display: block;
-  font-size: x-small;
+  font-size: 0.7rem;
   position: absolute;
   margin: 4px;
   text-decoration: none;
+  text-shadow: 0 0 5px var(--oled-red-glow);
+  z-index: 30;
 }
+
 #commit-id:hover {
   text-decoration: underline;
+  text-shadow: 0 0 10px var(--oled-red-glow),
+               0 0 20px var(--oled-red-glow);
 }
 
 #format-containers {
   display: flex;
+  position: relative;
+  z-index: 10;
 }
 
 .format-container {
@@ -77,28 +199,80 @@ body {
   align-items: center;
   width: 50vw;
   min-height: 70vh;
-  padding: 0.8em 7em;
+  padding: 1em 3em;
+  border: 2px solid var(--oled-red);
+  background: rgba(0, 0, 0, 0.8);
+  box-shadow: 0 0 15px var(--oled-red-glow),
+              inset 0 0 20px rgba(255, 0, 0, 0.05);
+  position: relative;
 }
+
+.format-container::before {
+  content: '┌';
+  position: absolute;
+  top: -2px;
+  left: 10px;
+  font-size: 1.5rem;
+  color: var(--oled-red);
+  text-shadow: 0 0 10px var(--oled-red-glow);
+}
+
+.format-container::after {
+  content: '┐';
+  position: absolute;
+  top: -2px;
+  right: 10px;
+  font-size: 1.5rem;
+  color: var(--oled-red);
+  text-shadow: 0 0 10px var(--oled-red-glow);
+}
+
 .format-container h2 {
   text-align: center;
   margin-bottom: 20px;
+  font-size: 2rem;
+  text-shadow: 0 0 10px var(--oled-red-glow),
+               0 0 20px var(--oled-red-glow);
+  letter-spacing: 5px;
 }
 
 #from-container {
-  background-color: lightgray;
+  border-color: var(--oled-red);
+  box-shadow: 0 0 15px var(--oled-red-glow),
+              inset 0 0 20px rgba(255, 0, 0, 0.05);
 }
+
 #to-container {
-  background-color: rgb(184, 184, 184);
+  border-color: var(--oled-red);
+  box-shadow: 0 0 15px var(--oled-red-glow),
+              inset 0 0 20px rgba(255, 0, 0, 0.05);
 }
 
 .search {
   text-align: center;
   margin-bottom: 30px;
   padding: 10px 20px;
-  border: 0;
+  border: 2px solid var(--oled-red);
   border-radius: 5px;
   outline: none;
-  box-shadow: 0 5px 0 0 darkgrey;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: var(--oled-red);
+  font-family: 'VT323', monospace;
+  font-size: 1.2rem;
+  width: 80%;
+  box-shadow: 0 0 10px var(--oled-red-glow);
+  text-shadow: 0 0 5px var(--oled-red-glow);
+}
+
+.search::placeholder {
+  color: var(--oled-red-dim);
+  text-shadow: none;
+}
+
+.search:focus {
+  background-color: rgba(255, 0, 0, 0.1);
+  box-shadow: 0 0 20px var(--oled-red-glow),
+              0 0 40px var(--oled-red-glow);
 }
 
 .format-list {
@@ -106,29 +280,54 @@ body {
   flex-flow: column nowrap;
   width: 100%;
   align-items: center;
-  background-color: white;
-  border-radius: 10px;
-  padding: 30px;
+  background-color: rgba(0, 0, 0, 0.9);
+  border-radius: 5px;
+  padding: 20px;
   margin-bottom: 5vw;
+  border: 1px solid var(--oled-red-dim);
+  box-shadow: inset 0 0 10px rgba(255, 0, 0, 0.1);
 }
 
 .format-list button {
-  width: 80%;
-  margin: 5px 0;
-  padding: 10px;
-  color: black;
-  background-color: lightgray;
-  border: 0;
-  border-radius: 10px;
-  font-family: monospace;
+  width: 90%;
+  margin: 8px 0;
+  padding: 12px 15px;
+  color: var(--oled-red);
+  background-color: transparent;
+  border: 1px solid var(--oled-red-dim);
+  border-radius: 3px;
+  font-family: 'VT323', monospace;
+  font-size: 1.3rem;
   word-break: break-word;
   cursor: pointer;
+  text-shadow: 0 0 5px var(--oled-red-glow);
+  transition: all 0.2s ease;
+  position: relative;
 }
 
-button.selected {
-  background-color: var(--highlight-color);
-  color: white;
+.format-list button::before {
+  content: '■';
+  margin-right: 8px;
+  font-size: 0.8rem;
+  color: var(--oled-red);
+}
+
+.format-list button:hover {
+  background-color: var(--oled-red);
+  color: var(--oled-black);
+  border-color: var(--oled-red);
+  box-shadow: 0 0 15px var(--oled-red-glow),
+              0 0 30px var(--oled-red-glow);
+  transform: scale(1.02);
+}
+
+.format-list button.selected {
+  background-color: var(--oled-red);
+  color: var(--oled-black);
   font-weight: bold;
+  box-shadow: 0 0 20px var(--oled-red-glow),
+              0 0 40px var(--oled-red-glow);
+  border-color: var(--oled-red);
 }
 
 #convert-button {
@@ -136,17 +335,48 @@ button.selected {
   left: 50%;
   bottom: 5%;
   transform: translateX(-50%);
-  font-size: 1.5rem;
-  padding: 10px 20px;
-  border: 0;
-  border-radius: 10px;
-  background-color: var(--highlight-color);
-  color: white;
+  font-size: 2rem;
+  padding: 15px 40px;
+  border: 3px solid var(--oled-red);
+  border-radius: 5px;
+  background-color: transparent;
+  color: var(--oled-red);
   cursor: pointer;
+  font-family: 'VT323', monospace;
+  font-weight: bold;
+  z-index: 20;
+  box-shadow: 0 0 15px var(--oled-red-glow),
+              0 0 30px var(--oled-red-glow),
+              inset 0 0 20px rgba(255, 0, 0, 0.1);
+  text-shadow: 0 0 10px var(--oled-red-glow);
+  transition: all 0.3s ease;
+  letter-spacing: 10px;
+}
+
+#convert-button::before {
+  content: '▶ ';
+}
+
+#convert-button::after {
+  content: ' ◀';
+}
+
+#convert-button:hover:not(.disabled) {
+  background-color: var(--oled-red);
+  color: var(--oled-black);
+  box-shadow: 0 0 30px var(--oled-red-glow),
+              0 0 60px var(--oled-red-glow),
+              0 0 90px var(--oled-red-glow);
+  transform: translateX(-50%) scale(1.05);
+}
+
+#convert-button:active:not(.disabled) {
+  transform: translateX(-50%) scale(0.98);
 }
 
 .disabled {
   filter: grayscale(1);
+  opacity: 0.5;
   pointer-events: none;
 }
 
@@ -156,55 +386,148 @@ button.selected {
   top: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.9);
+  z-index: 100;
+  display: none;
 }
+
+#popup-bg.active {
+  display: block;
+}
+
 #popup {
   position: fixed;
   left: 50%;
   top: 50%;
-  width: 20vw;
+  width: 30vw;
+  min-width: 300px;
   transform: translate(-50%, -50%);
-  background-color: white;
-  padding: 15px;
+  background-color: rgba(0, 0, 0, 0.95);
+  padding: 30px;
   border-radius: 10px;
   text-align: center;
+  border: 3px solid var(--oled-red);
+  box-shadow: 0 0 30px var(--oled-red-glow),
+              0 0 60px var(--oled-red-glow);
+  z-index: 101;
+}
+
+#popup h2 {
+  font-size: 1.8rem;
+  margin: 0 0 20px 0;
+  color: var(--oled-red);
+  text-shadow: 0 0 15px var(--oled-red-glow);
+  letter-spacing: 3px;
 }
 
 #popup button {
-  font-size: 1rem;
-  padding: 7px 20px;
-  border: 0;
-  border-radius: 10px;
-  background-color: lightgray;
-  color: black;
+  font-size: 1.2rem;
+  padding: 12px 30px;
+  border: 2px solid var(--oled-red);
+  border-radius: 5px;
+  background-color: transparent;
+  color: var(--oled-red);
   cursor: pointer;
+  font-family: 'VT323', monospace;
+  margin: 10px;
+  text-shadow: 0 0 5px var(--oled-red-glow);
+  transition: all 0.2s ease;
 }
 
+#popup button:hover {
+  background-color: var(--oled-red);
+  color: var(--oled-black);
+  box-shadow: 0 0 20px var(--oled-red-glow);
+}
+
+/* CRT flicker animation */
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  92% { opacity: 1; }
+  93% { opacity: 0.8; }
+  94% { opacity: 1; }
+  96% { opacity: 0.9; }
+  97% { opacity: 1; }
+}
+
+body {
+  animation: flicker 0.15s infinite;
+}
+
+/* Glitch effect on hover */
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+
+.format-list button:hover {
+  animation: glitch 0.3s ease;
+}
+
+/* Responsive design */
 @media only screen and (max-width: 800px) {
   #drop-hint-text {
     display: none;
   }
+  
   .format-container {
     width: 100%;
     box-sizing: border-box;
-    padding: 0.8em 4em;
+    padding: 1em 2em;
+    min-height: 50vh;
   }
+  
   .format-list button {
-    width: 100%;
+    width: 95%;
   }
+  
   #format-containers {
     flex-flow: column nowrap;
   }
+  
   #popup {
-    width: 80vw;
+    width: 90vw;
+    min-width: auto;
+    padding: 20px;
   }
+  
   #side-panel {
-    width: 50%;
-    padding: 0.8em;
-    text-align: right;
+    width: 100%;
+    padding: 1em;
+    text-align: center;
   }
+  
   #side-panel button {
-    font-size: 0.8rem;
-    padding: 10px;
+    font-size: 0.9rem;
+    padding: 8px 15px;
   }
+  
+  #convert-button {
+    font-size: 1.5rem;
+    padding: 12px 25px;
+    letter-spacing: 5px;
+  }
+  
+  .format-container h2 {
+    font-size: 1.5rem;
+  }
+  
+  .format-list button {
+    font-size: 1.1rem;
+  }
+}
+
+/* Japanese text styling */
+.japanese-text {
+  font-family: 'Noto Sans JP', sans-serif;
+}
+
+.english-text {
+  font-size: 0.6em;
+  color: var(--oled-red-dim);
+  text-shadow: none;
 }
